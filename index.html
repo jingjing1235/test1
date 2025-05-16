@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kindaichi Live Action</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background: #121212;
+      color: #fff;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+      background: linear-gradient(90deg, #f9d423, #ff4e50);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    #generations {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .generation {
+      width: 100%;
+      max-width: 960px;
+    }
+
+    .gen-title {
+      font-size: 1.5rem;
+      cursor: pointer;
+      background: #333;
+      padding: 15px;
+      border-radius: 8px;
+      transition: background 0.3s ease;
+      position: relative;
+      text-align: center;
+    }
+
+    .gen-title::after {
+      content: '\25BC';
+      position: absolute;
+      right: 20px;
+      transition: transform 0.3s ease;
+    }
+
+    .gen-title.open::after {
+      transform: rotate(180deg);
+    }
+
+    .gen-title:hover {
+      background: #444;
+    }
+
+    .episodes {
+      display: none;
+      margin-top: 10px;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .episode {
+      padding: 12px;
+      background: #1e1e1e;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+
+    .episode:hover {
+      background: #2a2a2a;
+      transform: scale(1.03);
+    }
+
+    .episode.active {
+      background: #ffcc00;
+      color: #000;
+      font-weight: bold;
+    }
+
+    #video-container {
+      margin-top: 30px;
+      display: none;
+      justify-content: center;
+    }
+
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 960px;
+      aspect-ratio: 16 / 9;
+      margin: 0 auto;
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (min-width: 769px) {
+      .episodes {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .episodes {
+        display: block;
+      }
+
+      .gen-title { font-size: 1.2rem; }
+      .episode {
+        font-size: 1rem;
+        min-width: 150px;
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      :fullscreen .episode {
+        font-size: 0.75rem;
+      }
+
+      :fullscreen .gen-title {
+        font-size: 1rem;
+      }
+
+      :fullscreen body {
+        font-size: initial;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+<!-- ✅ Bộ đếm ở góc phải trên cùng - tối ưu mobile -->
+<div style="position: fixed; top: 8px; right: 8px; z-index: 9999;">
+  <a href="https://www.hitwebcounter.com" target="_blank">
+    <img src="https://hitwebcounter.com/counter/counter.php?page=12345678&style=0006&nbdigits=5&type=page&initCount=0"
+      title="Visitor Counter" alt="visitor counter"
+      style="border: 0; width: 80px; height: auto; max-width: 100%;" />
+  </a>
+</div>
+
+
+  <h1>Kindaichi Live Action</h1>
+
+  <div id="generations"></div>
+
+  <div id="video-container">
+    <div class="video-wrapper">
+      <iframe id="video-frame" allowfullscreen></iframe>
+    </div>
+  </div>
+  
+  <script>
+    const generationsData = [
+      {
+        title: "Thế hệ 1",
+        episodes: [
+          "Bí ẩn làng Lục Giác",
+          "Án Mạng Ở Hồ Hiren",
+          "Án Mạng Trên Đảo Hiho",
+          "Vụ Án Bảy Bí Ẩn Ở Trường",
+          "Án Mạng Trong Nhà Hát Opera",
+          "Vụ Án Khúc Hát Ru Từ Địa Ngục",
+          "Án Mạng Trong Mật Thất Ở Hida",
+          "Án Mạng Ở Lâu Đài Người Sáp",
+          "Vụ Án Tuyết Dạ Xoa [SP]",
+          "Tay Sai Của Quỷ Dữ",
+          "Án Mạng Ở Sơn Trang Tarot",
+          "Lệnh Truy Nã Kindaichi",
+          "Vụ Án Siêu Trộm Hào Hoa",
+          "Án Mạng Tại Dị Nhân Quán",
+          "Án Mạng Trên Đảo Nghĩa Địa",
+          "Vụ án Truyền thuyết người cá Thượng Hải [SP]"
+        ]
+      },
+      {
+        title: "Thế hệ 2",
+        episodes: [
+          "Vụ Án Con Tàu Ma P1",
+          "Vụ Án Con Tàu Ma P2",
+          "Vụ Án Đồng Franc Pháp Oan Nghiệt",
+          "Vụ Án Cánh Bướm Tử Thần P1",
+          "Vụ Án Cánh Bướm Tử Thần P2",
+          "Vụ Bắt Cóc Reika",
+          "Án Mạng Trong Rừng Ma Khuyển",
+          "Án Mạng Tại Lâu Đài Búp Bê Nga P1",
+          "Án Mạng Tại Lâu Đài Búp Bê Nga P2",
+          "Án Mạng Trên Chuyến Tàu Ảo Thuật [SP]"
+        ]
+      },
+      {
+        title: "Thế hệ 3",
+        episodes: ["Vụ án Truyền thuyết Ma Cà Rồng"]
+      },
+      {
+        title: "Thế hệ 4",
+        episodes: [
+          "Sát thủ cung Bọ Cạp",
+          "Án mạng ở lâu đài trò chơi",
+          "Án mạng ở đảo Ma Trơi P1",
+          "Án mạng ở đảo Ma Trơi P2",
+          "Vụ hành quyết Kindaichi P1",
+          "Vụ hành quyết Kindaichi P2",
+          "Án mạng tại làng Yukikage",
+          "Án mạng ở biệt thự Rosenkreuz P1",
+          "Án mạng ở biệt thự Rosenkreuz P2",
+          "Vụ án Báu Vật Cửu Long Hồng Kông [SP]",
+          "Án mạng tại trường luyện thi Ngục Môn [SP]"
+        ]
+      },
+      {
+        title: "Thế hệ 5",
+        episodes: [
+          "Vụ án bảy bí ẩn ở trường [Remake]",
+          "Án Mạng Trên Đảo Seiren P1",
+          "Án Mạng Trên Đảo Seiren P2",
+          "Án Mạng Ở Lò Rượu Bạch Xà",
+          "Ngôi trường hoang phế",
+          "Lệnh truy nã Kindaichi P1 [Remake]",
+          "Lệnh truy nã Kindaichi P2 [Remake]",
+          "Án mạng trong mật thất ở Hida [Remake]",
+          "Án mạng thứ ba của nhà hát Opera P1",
+          "Án mạng thứ ba của nhà hát Opera P2"
+        ]
+      }
+    ];
+
+    const videoLinks = {
+      "Thế hệ 1": [
+        "https://drive.google.com/file/d/1Bmun40fr8u2O78pwifkbveq88-CMq2iP/preview",
+        "https://drive.google.com/file/d/1xo5O32NPJvKeo95rxMxoT5ZpAclrMzLY/preview",
+        "https://drive.google.com/file/d/1Cfm8CghLa-lAuECs8Cc8FzKyadm917oF/preview",
+        "https://drive.google.com/file/d/1UFaguOXFGdZbyq3aPtnh54hMziD_M5Qm/preview",
+        "https://drive.google.com/file/d/1hqp5LoVZ7S1eaRqE5hn6XVaEnlcuAS5V/preview",
+        "https://drive.google.com/file/d/1sA36ReWeACpV7Hj1gICHqtVS1dUA9lXM/preview",
+        "https://drive.google.com/file/d/1J2ECssN0Pdem-OOXCw9vgMxPKpIJD3Iv/preview",
+        "https://drive.google.com/file/d/1wqo_r6QN_N6TsbAVlZTJhWcrEnZqjAi8/preview",
+        "https://drive.google.com/file/d/1DMr9tgOvTK8_Glc_QW5j5fTPD2PCXztV/preview",
+        "https://drive.google.com/file/d/17iZIQCS0zqR6wmRKXSTvUrVzEXiDKrFN/preview",
+        "https://drive.google.com/file/d/1dXSiaiMgDIXGVhDk4yOXB-HtrPdXwVNw/preview",
+        "https://drive.google.com/file/d/1H_ixgYNINhiLe-sjmp4xDrd4WOKfPpSH/preview",
+        "https://drive.google.com/file/d/1m5LckSpANCyWQDiL1ueJYn9cpzOQP8_I/preview",
+        "https://drive.google.com/file/d/1nweW-Up9PWRDW-YYQ4i6d-Mudd9b5Fwv/preview",
+        "https://drive.google.com/file/d/1xp0asapqbpPkLMIA-W-tqWzOOM3KWz4e/preview",
+        "https://drive.google.com/file/d/1GmTGBo1m6aGI6h36mbXxcGBLV2N5Q6uV/preview"
+      ],
+      "Thế hệ 2": [
+        "https://drive.google.com/file/d/1x8x8W5zwKLD-4072jBK5D-DnliJ1qx0q/preview",
+        "https://drive.google.com/file/d/1OzbgaIh2YRwXBC8nboliYy1NoEP_YuMo/preview",
+        "https://drive.google.com/file/d/1tPMU4tmw2X8b2LnLNsoVRNW65swuXg3S/preview",
+        "https://drive.google.com/file/d/1tRNmXOzJe8j2cyq5ucIVHyDUjrxgMWQC/preview",
+        "https://drive.google.com/file/d/1KsELxyXBja8z9FY7ZkXtqlr0DB1bt9ES/preview",
+        "https://drive.google.com/file/d/1hDYqXdeBFeFWYCxGZ_NmdHVrEKO0Nm3D/preview",
+        "https://drive.google.com/file/d/1tLiBfU-ofzHHVisVRFw6b0_bqlvYur8f/preview",
+        "https://drive.google.com/file/d/1yAeGyg_As6u4pV330UKGztgcinAoqYqN/preview",
+        "https://drive.google.com/file/d/13GgjtuutDcU-2eUR5KyoKoEA4NaxSuA9/preview",
+        "https://drive.google.com/file/d/1OD_L4BY5amGBCAYIIAjTukwaER-S4_vo/preview"
+      ],
+      "Thế hệ 3": ["https://drive.google.com/file/d/1iDA9v1wP0bT7pbYxI7VhS4ZjPdtAnl-4/preview"],
+      "Thế hệ 4": [
+        "https://drive.google.com/file/d/1XIt0GRKgZG0cRAvasMGu1tXW0PbvPQnq/preview",
+        "https://drive.google.com/file/d/1GTrQGv0GpZH6WAnrEpNi3auqUoH5BrWy/preview",
+        "https://drive.google.com/file/d/1MNNGfcbeaOlAftNyIVddfvJSqCegrPH-/preview",
+        "https://drive.google.com/file/d/1KG-3zn-7zV0V-QLfifXpPaV72iRPR849/preview",
+        "https://drive.google.com/file/d/14wzNZ5nk0Q2TeoeJlk7j8uhcPZmaNuHf/preview",
+        "https://drive.google.com/file/d/1TaDcly-ya7-Lr4P866NPKvzYVEZK7xy9/preview",
+        "https://drive.google.com/file/d/1RV0Hy_h5MHAu67LBFM1Wam9TuhCM5MA8/preview",
+        "https://drive.google.com/file/d/1Ndoy2pbVaOYG6cQ6GXjUagT0RMGz1wio/preview",
+        "https://drive.google.com/file/d/1DJtUmsIAlGxhtlr02njKeXL-X78Syvaz/preview",
+        "https://drive.google.com/file/d/1NPumiZWU7-IXulUse_42L8HFtjrmgCMi/preview",
+        "https://drive.google.com/file/d/1BPFj3TQ476K7Xmq8tifSJ7amjW2zB51k/preview"
+      ],
+      "Thế hệ 5": [
+        "https://drive.google.com/file/d/1Rt-qoRPbE1bk-ObEaZ59VlMtBR74BBzO/preview",
+        "https://drive.google.com/file/d/1RhyJuvLdDFsI0mHS5aIj6YDGwg83cHPk/preview",
+        "https://drive.google.com/file/d/151fmlNrdxTPz24fcQpjpsRJPMOr5C7cR/preview",
+        "https://drive.google.com/file/d/1mxyJ3eFcYIyyR7duvBoU6Y3sIp_DE8RV/preview",
+        "https://drive.google.com/file/d/1OhCuqQ-spohRslKBLqQM9Bj0X4gKnLjX/preview",
+        "https://drive.google.com/file/d/1Dgp4zfs96HCaAWplB254az8zel4MnYIY/preview",
+        "https://drive.google.com/file/d/18OrSiIWnG-tMZ6FHa4APaLH4vdALKlKw/preview",
+        "https://drive.google.com/file/d/1qvI0WYtMlE71qXrNmu-nvBdzk-JTfriY/preview",
+        "https://drive.google.com/file/d/16GeqiRLa4H3yLvswVHtF0nRfKOm9B-bo/preview",
+        "https://drive.google.com/file/d/1iFC_43ztWhXN3Mzi87cJSsmCRJ35RbYa/preview"
+      ]
+    };
+
+    const generationsContainer = document.getElementById("generations");
+    let currentVisible = null;
+    let currentActive = null;
+
+    generationsData.forEach((gen) => {
+      const genDiv = document.createElement("div");
+      genDiv.className = "generation";
+
+      const title = document.createElement("div");
+      title.className = "gen-title";
+      title.textContent = gen.title;
+
+      const episodeList = document.createElement("div");
+      episodeList.className = "episodes";
+      episodeList.style.display = "none";
+
+      gen.episodes.forEach((epTitle, index) => {
+        const ep = document.createElement("div");
+        ep.className = "episode";
+        ep.textContent = `${index + 1}. ${epTitle}`;
+        ep.addEventListener("click", () => {
+          const videoUrl = videoLinks[gen.title][index];
+  const iframe = document.getElementById("video-frame");
+  iframe.src = videoUrl;
+
+  // ✅ Gửi tên tập vào Google Sheets
+  logEpisodeView(epTitle);
+
+  const container = document.getElementById("video-container");
+  container.style.display = "flex";
+  container.scrollIntoView({ behavior: "smooth" });
+
+  if (currentActive) {
+    currentActive.classList.remove("active");
+  }
+  ep.classList.add("active");
+  currentActive = ep;
+});
+
+        episodeList.appendChild(ep);
+      });
+
+      title.addEventListener("click", () => {
+        if (currentVisible && currentVisible !== episodeList) {
+          currentVisible.previousSibling.classList.remove("open");
+          currentVisible.style.display = "none";
+        }
+        const isOpen = episodeList.style.display === "grid" || episodeList.style.display === "block";
+        episodeList.style.display = isOpen ? "none" : window.innerWidth > 768 ? "grid" : "block";
+        title.classList.toggle("open", !isOpen);
+        currentVisible = !isOpen ? episodeList : null;
+      });
+
+      genDiv.appendChild(title);
+      genDiv.appendChild(episodeList);
+      generationsContainer.appendChild(genDiv);
+    });
+
+    document.addEventListener('fullscreenchange', async () => {
+      if (document.fullscreenElement && /Mobi|Android/i.test(navigator.userAgent)) {
+        try {
+          await screen.orientation.lock('landscape');
+        } catch (err) {
+          console.log("Không thể xoay ngang:", err);
+        }
+      }
+    });
+    
+    
+    // ✅ Gửi tên tập vào Google Sheet mỗi khi người dùng bấm
+function logEpisodeView(episodeName) {
+  fetch("https://script.google.com/macros/s/AKfycbx9_GF3n5zOkfezzXUvp82o685OuUkedJzbWnDnkTf9ss2Yv9Uwm_hmC4QLbeSHfsx6Ag/exec", {
+    method: "POST",
+    body: JSON.stringify({ episode: episodeName }),
+    mode: "no-cors"
+  }).catch(err => console.error("Lỗi ghi vào Google Sheet:", err));
+}
+
+  </script>
+</body>
+</html>
+
